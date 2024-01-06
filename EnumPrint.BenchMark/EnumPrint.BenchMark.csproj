@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net8.0;net48;net461</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>12</LangVersion>
+		<PlatformTarget>AnyCPU</PlatformTarget>
+	</PropertyGroup>
+	<ItemGroup>
+	  <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\EnumPrint\EnumPrint.csproj" />
+	</ItemGroup>
+
+</Project>

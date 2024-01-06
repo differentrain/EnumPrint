@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard1.0</TargetFramework>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>EnumPrint</Title>
+    <PackageTags>Enum,Enum.ToString,Enum.Print</PackageTags>
+  </PropertyGroup>
+
+</Project>
