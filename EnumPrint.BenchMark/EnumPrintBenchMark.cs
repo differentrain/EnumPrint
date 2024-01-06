@@ -1,7 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 
-
 namespace EnumPrint.BenchMark
 {
     [SimpleJob(RuntimeMoniker.Net461)]
