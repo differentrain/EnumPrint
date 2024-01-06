@@ -10,7 +10,7 @@ This library solved these problem:
 
 ### Installation
 
-`nuget install EnumPrint`
+`NuGet\Install-Package EnumPrint`
 
 ***EnumPrint requires .NET Standard 1.0 . But if you copy the source code to you project directly, it may supports more runtime version.***
 
