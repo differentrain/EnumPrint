@@ -12,7 +12,7 @@ This library solved these problem:
 
 `NuGet\Install-Package EnumPrint`
 
-***EnumPrint requires .NET Standard 1.0 . But if you copy the source code to you project directly, it may supports more runtime version with little modification.***
+***EnumPrint requires .NET Standard 1.0 . But if you copy the source code to you project directly, it may supports more runtime version with [little modification](#how-to-make-this-libaray-supports-net-framework-20).***
 
 ### Convert Enum Value To String
 
@@ -93,3 +93,176 @@ s =(Num.One | Num.Two).Print();
 | TestToStringX | .NET Framework 4.8   | .NET Framework 4.8   |  2,484.2 ns |  46.90 ns |  39.16 ns |  2,481.6 ns |
 
 ## How To Make This Libaray Supports .NET Framework 2.0
+
+### Step.1
+
+.NET Framework 2.0 does not support extension-methods, so the first step is add related type(s):
+
+```
+// internal is enough, do not need to expose this type.
+
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
+    internal sealed class ExtensionAttribute : Attribute { }
+}
+```
+### Step.2
+
+Since .NET Framework 2.0 does not import `TypeInfo` class, then we should use [GetCustomAttributes(Boolean)](https://learn.microsoft.com/en-us/dotnet/api/system.reflection.memberinfo.getcustomattributes?view=net-8.0#system-reflection-memberinfo-getcustomattributes(system-boolean)) method to get custom attributes.
+
+Original code:
+
+```
+ static EnumPrintHelper()
+ {
+     Type type = typeof(T);
+     TypeInfo typeInfo =type.GetTypeInfo();
+     ……
+     ……
+     HasFlags = typeInfo.GetCustomAttribute<FlagsAttribute>() != null;
+     EnumSeparatorAttribute spAttr = typeInfo.GetCustomAttribute<EnumSeparatorAttribute>();
+     ……
+     ……
+     friendlyNameAttr = typeInfo.GetDeclaredField(output).GetCustomAttribute<EnumValueFriendlyNameAttribute>();
+     ……
+     ……
+ }
+```
+New Code:
+
+```
+ static EnumPrintHelper()
+ {
+     Type type = typeof(T);
+     TypeInfo typeInfo =type.GetTypeInfo();
+     HasFlags = false;
+     s_separator = ", ";
+     foreach (object item in attributes)
+     {
+        if (item is FlagsAttribute)
+        {
+            HasFlags = true;
+        }
+        else if (item is EnumSeparatorAttribute enumSeparator)
+        {
+            s_separator = enumSeparator.Separator;
+        }
+     }
+     ……
+     ……
+     friendlyNameAttr = type.GetField(output)
+                            .GetCustomAttributes(true)
+                            .FirstOrDefault(c=>c is EnumValueFriendlyNameAttribute) as EnumValueFriendlyNameAttribute;
+     ……
+     ……
+ }
+```
+The **full code** is :
+
+```
+static EnumPrintHelper()
+{
+    Type type = typeof(T);
+    object[] attributes = type.GetCustomAttributes(false);
+    HasFlags = false;
+    s_separator = ", ";
+    foreach (object item in attributes)
+    {
+        if (item is FlagsAttribute)
+        {
+            HasFlags = true;
+        }
+        else if (item is EnumSeparatorAttribute enumSeparator)
+        {
+            s_separator = enumSeparator.Separator;
+        }
+    }
+    Type basetype = Enum.GetUnderlyingType(type);
+    if (basetype == typeof(byte))
+    {
+        s_baseType = TypeCode.Byte;
+    }
+    else if (basetype == typeof(SByte))
+    {
+        s_baseType = TypeCode.SByte;
+    }
+    else if (basetype == typeof(Int16))
+    {
+        s_baseType = TypeCode.Int16;
+    }
+    else if (basetype == typeof(UInt16))
+    {
+        s_baseType = TypeCode.UInt16;
+    }
+    else if (basetype == typeof(Int32))
+    {
+        s_baseType = TypeCode.Int32;
+    }
+    else if (basetype == typeof(UInt32))
+    {
+        s_baseType = TypeCode.UInt32;
+    }
+    else if (basetype == typeof(Int64))
+    {
+        s_baseType = TypeCode.Int64;
+    }
+    else
+    {
+        s_baseType = TypeCode.UInt64;
+    }
+    Array values = Enum.GetValues(type);
+    int length = values.Length;
+    s_values = new T[length];
+    s_values64 = new ulong[length];
+    s_names = new string[length];
+    EnumValueFriendlyNameAttribute friendlyNameAttr;
+    string output;
+    s_charBuffSize = 0;
+    unsafe
+    {
+        fixed (T* tp = s_values)
+        fixed (ulong* lp = s_values64)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                tp[i] = (T)values.GetValue(i);
+                lp[i] = GetUInt64(tp[i]);
+                output = tp[i].ToString();
+                friendlyNameAttr = type
+                    .GetField(output)
+                    .GetCustomAttributes(true)
+                    .FirstOrDefault(c => c is EnumValueFriendlyNameAttribute) as EnumValueFriendlyNameAttribute;
+                if (friendlyNameAttr != null)
+                {
+                    output = friendlyNameAttr.Name;
+                }
+                s_charBuffSize += output.Length + s_separator.Length;
+                s_names[i] = output;
+            }
+        }
+    }
+    if (s_charBuffSize > 0)
+    {
+        s_flagsStartIndex = s_values.Length - 1;
+        if (s_values64[0] == 0)
+        {
+            s_flagsEndIndex = 1;
+            s_flagsValueWhenZero = s_names[0];
+        }
+        else
+        {
+            s_flagsEndIndex = 0;
+            s_flagsValueWhenZero = "0";
+        }
+    }
+}
+```
+
+### Step.3
+
+In `EnumValueFriendlyNameAttribute` class, we used `string.IsNullOrWhiteSpace` for arguments verification. 
+
+Remove it!
+
+Or verify arguments by another way.
