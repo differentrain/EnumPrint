@@ -12,7 +12,7 @@ This library solved these problem:
 
 `NuGet\Install-Package EnumPrint`
 
-***EnumPrint requires .NET Standard 1.0 . But if you copy the source code to you project directly, it may supports more runtime version.***
+***EnumPrint requires .NET Standard 1.0 . But if you copy the source code to you project directly, it may supports more runtime version with little modification.***
 
 ### Convert Enum Value To String
 
@@ -91,3 +91,5 @@ s =(Num.One | Num.Two).Print();
 | TestToStringD | .NET Framework 4.8   | .NET Framework 4.8   |  2,258.5 ns |  43.82 ns |  53.82 ns |  2,235.6 ns |
 | TestPrintX    | .NET Framework 4.8   | .NET Framework 4.8   |  1,332.3 ns |  19.40 ns |  17.19 ns |  1,331.1 ns |
 | TestToStringX | .NET Framework 4.8   | .NET Framework 4.8   |  2,484.2 ns |  46.90 ns |  39.16 ns |  2,481.6 ns |
+
+## How To Make This Libaray Supports .NET Framework 2.0
