@@ -179,7 +179,6 @@ namespace EnumPrint
                 if (s_charBuffSize > 0)
                 {
                     s_flagsStartIndex = s_values.Length - 1;
-                    s_flagsEndIndex = s_values.Length - 1;
                     if (s_values64[0] == 0)
                     {
                         s_flagsEndIndex = 1;
