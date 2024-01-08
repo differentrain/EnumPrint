@@ -3,7 +3,7 @@
 EnumPrint is a high performance library for convert the enum value to its string representation.
 
 This library solved these problem:
-- Output enum value with its friendly name.
+- Output enum value with its [friendly name](#customizing-output-content).
 - Improved the performance of enum-to-string convertion in .NET Framework. 
 
 ## Getting Started
